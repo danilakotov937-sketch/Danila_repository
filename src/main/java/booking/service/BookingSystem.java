@@ -5,10 +5,12 @@ import booking.model.Employee;
 import booking.model.OneTimeBooking;
 import booking.model.Room;
 import booking.model.TimeInterval;
+import booking.model.WeeklyBooking;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
+import java.time.DayOfWeek;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
@@ -109,6 +111,30 @@ public class BookingSystem {
         }
         result.sort(Comparator.comparingInt(Room::getCapacity));
         return result;
+    }
+
+    /**
+     * Бронирует помещение каждую неделю в один и тот же день и время.
+     * Даты, на которые помещение уже занято, пропускаются; список пропусков есть в отчёте серии.
+     *
+     * @param from  с какой даты искать нужный день недели
+     * @param until последняя дата серии (включительно)
+     */
+    public WeeklyBooking bookWeekly(Room room, Employee employee, String title, DayOfWeek day,
+                                    LocalTime start, LocalTime end, LocalDate from, LocalDate until) {
+        WeeklyBooking series = new WeeklyBooking(nextId++, room, employee, title, day, start, end, from, until);
+        if (series.getDates().isEmpty()) {
+            throw new IllegalArgumentException("В этом периоде нет подходящих дней");
+        }
+        for (LocalDate date : series.getDates()) {
+            TimeInterval interval = series.occurrence(date);
+            checkWorkingHours(interval);
+            if (findConflict(room, interval, null) != null) {
+                series.skip(date);
+            }
+        }
+        bookings.add(series);
+        return series;
     }
 
     private Booking findById(int id) {

@@ -5,9 +5,11 @@ import booking.model.OneTimeBooking;
 import booking.model.Room;
 import booking.model.RoomType;
 import booking.model.TimeInterval;
+import booking.model.WeeklyBooking;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
+import java.time.DayOfWeek;
 import java.time.LocalDate;
 import java.time.LocalTime;
 import java.util.List;
@@ -95,5 +97,17 @@ class BookingSystemTest {
         assertEquals(List.of(small, big), system.findFreeRooms(5, at("11:00", "12:00")));
         assertEquals(List.of(big), system.findFreeRooms(10, at("11:00", "12:00")));
         assertTrue(system.findFreeRooms(100, at("11:00", "12:00")).isEmpty());
+    }
+
+    @Test
+    void weeklyBookingSkipsBusyDates() throws BookingConflictException {
+        LocalDate busyDay = DAY.plusDays(8); // вторник 27 октября
+        system.book(small, petrova, TimeInterval.of(busyDay, LocalTime.of(14, 0), LocalTime.of(15, 0)), "Занято");
+        WeeklyBooking series = system.bookWeekly(small, ivanov, "Семинар", DayOfWeek.TUESDAY,
+                LocalTime.of(14, 30), LocalTime.of(16, 0), DAY, DAY.plusDays(15));
+        assertEquals(3, series.getDates().size()); // 20.10, 27.10, 03.11
+        assertEquals(List.of(busyDay), series.getSkippedDates());
+        assertTrue(series.intervalOn(busyDay).isEmpty());
+        assertTrue(series.intervalOn(DAY.plusDays(1)).isPresent());
     }
 }

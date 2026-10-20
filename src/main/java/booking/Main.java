@@ -5,9 +5,11 @@ import booking.model.OneTimeBooking;
 import booking.model.Room;
 import booking.model.RoomType;
 import booking.model.TimeInterval;
+import booking.model.WeeklyBooking;
 import booking.service.BookingConflictException;
 import booking.service.BookingSystem;
 
+import java.time.DayOfWeek;
 import java.time.LocalDate;
 import java.time.LocalTime;
 import java.util.List;
@@ -101,6 +103,14 @@ public class Main {
         System.out.println("\n=== 6. Подбор помещения ===");
         System.out.println("На 20 человек, 14:00-15:00: " + system.findFreeRooms(20, at(MON, "14:00", "15:00")));
         System.out.println("На 500 человек: " + system.findFreeRooms(500, at(MON, "14:00", "15:00")));
+
+        System.out.println("\n=== 7. Повторяющаяся бронь ===");
+        system.book(beta, kuznetsova, at(LocalDate.of(2026, 11, 3), "14:00", "16:00"), "Тренинг");
+        system.book(beta, kuznetsova, at(LocalDate.of(2026, 12, 1), "14:00", "15:00"), "Совещание");
+        WeeklyBooking seminar = system.bookWeekly(beta, sidorov, "Семинар", DayOfWeek.TUESDAY,
+                LocalTime.of(14, 0), LocalTime.of(15, 30), MON.plusDays(1), LocalDate.of(2026, 12, 22));
+        System.out.println(seminar);
+        System.out.println(seminar.report());
 
         int total = system.getRooms().size() + staff.size() + system.getBookings().size();
         System.out.println("\nВсего объектов в модели: " + total + " (помещений " + system.getRooms().size()
