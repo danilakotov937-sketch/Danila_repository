@@ -112,6 +112,17 @@ public class Main {
         System.out.println(seminar);
         System.out.println(seminar.report());
 
+        System.out.println("\n=== 8. Перенос брони ===");
+        try {
+            system.move(demoBooking.getId(), lect1, demoBooking.getInterval());
+        } catch (BookingConflictException e) {
+            System.out.println("Перенос невозможен: " + e.getMessage());
+        }
+        OneTimeBooking moved = system.move(demoBooking.getId(), alpha, at(MON, "09:00", "10:00"));
+        System.out.println("Перенесено: " + moved);
+        OneTimeBooking shifted = system.move(planning.getId(), alpha, at(MON, "10:30", "11:30"));
+        System.out.println("Сдвинуто: " + shifted);
+
         int total = system.getRooms().size() + staff.size() + system.getBookings().size();
         System.out.println("\nВсего объектов в модели: " + total + " (помещений " + system.getRooms().size()
                 + ", сотрудников " + staff.size() + ", броней " + system.getBookings().size() + ")");

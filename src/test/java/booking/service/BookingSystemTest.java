@@ -110,4 +110,24 @@ class BookingSystemTest {
         assertTrue(series.intervalOn(busyDay).isEmpty());
         assertTrue(series.intervalOn(DAY.plusDays(1)).isPresent());
     }
+
+    @Test
+    void moveToOtherRoomAndTime() throws BookingConflictException {
+        OneTimeBooking b = system.book(small, ivanov, at("10:00", "11:00"), "Планёрка");
+        OneTimeBooking moved = system.move(b.getId(), big, at("12:00", "13:00"));
+        assertEquals(b.getId(), moved.getId());
+        assertEquals(big, moved.getRoom());
+        assertEquals(1, system.getBookings().size());
+        // сдвиг в той же комнате на время, пересекающееся со старым, допустим
+        OneTimeBooking shifted = system.move(moved.getId(), big, at("12:30", "13:30"));
+        assertEquals(at("12:30", "13:30"), shifted.getInterval());
+    }
+
+    @Test
+    void moveConflictKeepsOldBooking() throws BookingConflictException {
+        OneTimeBooking b = system.book(small, ivanov, at("10:00", "11:00"), "Планёрка");
+        system.book(big, petrova, at("10:00", "11:00"), "Другая");
+        assertThrows(BookingConflictException.class, () -> system.move(b.getId(), big, at("10:30", "11:30")));
+        assertEquals(small, system.getBookings().get(0).getRoom());
+    }
 }

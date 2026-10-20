@@ -137,6 +137,28 @@ public class BookingSystem {
         return series;
     }
 
+    /**
+     * Переносит разовую бронь в другое помещение и/или на другое время.
+     * Если в новом месте занято, бронь остаётся на прежнем месте.
+     *
+     * @throws BookingConflictException если в новом месте/времени занято
+     * @throws IllegalArgumentException если брони нет или это повторяющаяся серия
+     */
+    public OneTimeBooking move(int id, Room newRoom, TimeInterval newInterval) throws BookingConflictException {
+        Booking old = findById(id);
+        if (!(old instanceof OneTimeBooking)) {
+            throw new IllegalArgumentException("Переносить можно только разовые брони");
+        }
+        checkWorkingHours(newInterval);
+        Booking conflict = findConflict(newRoom, newInterval, old); // саму переносимую бронь не считаем
+        if (conflict != null) {
+            throw new BookingConflictException(newRoom, newInterval, conflict);
+        }
+        OneTimeBooking moved = new OneTimeBooking(id, newRoom, old.getEmployee(), old.getTitle(), newInterval);
+        bookings.set(bookings.indexOf(old), moved);
+        return moved;
+    }
+
     private Booking findById(int id) {
         for (Booking b : bookings) {
             if (b.getId() == id) {

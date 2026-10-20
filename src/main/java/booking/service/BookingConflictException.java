@@ -4,11 +4,7 @@ import booking.model.Booking;
 import booking.model.Room;
 import booking.model.TimeInterval;
 
-/**
- * Помещение уже занято на запрошенное время.
- * Исключение проверяемое: занятое помещение - обычная ситуация, а не ошибка программиста,
- * и вызывающий код обязан решить, что делать (например, предложить другое помещение).
- */
+/** Помещение уже занято на запрошенное время.Исключение проверяемое. */
 public class BookingConflictException extends Exception {
     private final Booking conflicting;
 
