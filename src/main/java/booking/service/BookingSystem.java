@@ -150,7 +150,7 @@ public class BookingSystem {
             throw new IllegalArgumentException("Переносить можно только разовые брони");
         }
         checkWorkingHours(newInterval);
-        Booking conflict = findConflict(newRoom, newInterval, old); // саму переносимую бронь не считаем
+        Booking conflict = findConflict(newRoom, newInterval, old); // саму переносимую бронь игнорируем
         if (conflict != null) {
             throw new BookingConflictException(newRoom, newInterval, conflict);
         }
